@@ -112,8 +112,9 @@ let rec unify = (x, y, set) => {
 
   // If heads match, unification possible if all args unify pairwise.
   | (Pred(_, args_a), Pred(_, args_b)) => {
-    let (<$>) = (f, x) => Belt.Option.flatMap(x, f);
-    let reduce = (set_opt, x, y) => unify(x, y) <$> set_opt;
+    let reduce = (set_opt, x, y) => Utils.(
+      unify(x, y) <$> set_opt
+    );
 
     // Could be left or right fold here, doesn't really matter.
     try (List.fold_left2(reduce, Some(set), args_a, args_b)) {
