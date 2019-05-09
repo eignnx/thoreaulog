@@ -1,5 +1,5 @@
 {
-  "name": "unifier-set",
+  "name": "thoreaulog",
   "version": "0.1.0",
   "scripts": {
     "build": "bsb -make-world",
