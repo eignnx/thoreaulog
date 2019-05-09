@@ -1,5 +1,4 @@
 type comp = Var(string) | Atom(string) | Pred(string, list(comp));
-type node = Root(int) | Child(comp)
 
 let string_of_comp = c => {
   switch c {
@@ -8,6 +7,8 @@ let string_of_comp = c => {
   | Pred(s, l) => {j|Pred($s, $l)|j}
   }
 };
+
+type node = Root(int) | Child(comp)
 
 let string_of_node = n => {
   switch n {
@@ -23,13 +24,13 @@ module CompSet = Map.Make({
 
 type unifier_set = CompSet.t(node);
 let empty = CompSet.empty;
+let singleton = CompSet.singleton;
 
 // let string_of_unifier_set = u => {
 //   let roots = UnifSet.filter((k, v) => switch(v) {
 //     | Root(_) => true
 //     | _ => false
 //   });
-//   // UnifSet.
 //   u |> String.concat("\n")
 // };
 
@@ -54,6 +55,8 @@ and register_subcomps = (x: comp, set: unifier_set) => {
   | _ => set
   }
 };
+
+let from_list = list => empty |> register_all(list);
 
 let rec find_root_data = (x: comp, set: unifier_set) => {
   switch (CompSet.find(x, set)) {

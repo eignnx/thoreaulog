@@ -1,10 +1,9 @@
-
 open Jest;
 open Expect;
 open! Expect.Operators;
 
 open UnifierSet;
-open! Utils;
+open Utils;
 
 module Opt = Belt.Option;
 
@@ -29,7 +28,7 @@ describe("Expect", () => {
   let bar = Atom("bar");
   let p1 = Pred("likes", [foo, x]);
   let p2 = Pred("likes", [y, bar]);
-  let u = empty |> register_all([x, y, foo, bar, p1, p2]);
+  let u = from_list([x, y, foo, bar, p1, p2]);
 
   test("`find_root` of a root is itself", () => {
     expect(find_root(x, u)) |> toEqual(x)
@@ -60,7 +59,6 @@ describe("Expect", () => {
 
   test("registration of compound component registers subcomponents", () => {
     let u = empty |> register(p1);
-    let expected = empty |> register_all([p1, foo, x]);
-    expect(u) |> toEqual(expected)
+    expect(u) |> toEqual(from_list([p1, foo, x]))
   });
 });
