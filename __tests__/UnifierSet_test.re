@@ -61,4 +61,11 @@ describe("Expect", () => {
     let u = empty |> register(p1);
     expect(u) |> toEqual(from_list([p1, foo, x]))
   });
+
+  test("two predicates of different arity don't unify", () => {
+    let p1 = Pred("pred", [foo]);
+    let p2 = Pred("pred", [foo, bar]);
+    let u = from_list([p1, p2]);
+    expect(u |> unify(p1, p2)) |> toEqual(None)
+  });
 });
