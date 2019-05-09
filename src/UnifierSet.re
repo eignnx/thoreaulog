@@ -1,18 +1,28 @@
 type term = Var(string) | Pred(string, list(term));
 
-let string_of_comp = c => {
-  switch c {
-  | Var(s) => {j|Var($s)|j}
-  | Pred(s, l) => {j|Pred($s, $l)|j}
+let rec string_of_term = c => {
+  switch (c) {
+  | Var(s) => String.capitalize(s)
+  | Pred(head, args) => switch (args) {
+    | [] => {j|$head|j}
+    | _list =>
+      let args = args |> List.map(string_of_term) |> String.concat(", ");
+      {j|$head($args)|j}
+    }
+    
   }
 };
+
+let atom = name => Pred(name, []);
 
 type node = Root(int) | Child(term)
 
 let string_of_node = n => {
   switch n {
   | Root(c) => {j|Root($c)|j}
-  | Child(p) => {j|Child($p)|j}
+  | Child(p) =>
+    let parent = string_of_term(p);
+    {j|Child($parent)|j}
   }
 };
 
@@ -25,13 +35,15 @@ type unifier_set = CompSet.t(node);
 let empty = CompSet.empty;
 let singleton = CompSet.singleton;
 
-// let string_of_unifier_set = u => {
-//   let roots = UnifSet.filter((k, v) => switch(v) {
-//     | Root(_) => true
-//     | _ => false
-//   });
-//   u |> String.concat("\n")
-// };
+let string_of_unifier_set: unifier_set => string
+= unifs => {
+  unifs
+  |> CompSet.bindings
+  |> List.map(((k, v)) => string_of_term(k) ++ ": " ++ string_of_node(v))
+  |> List.map(s => "\t" ++ s)
+  |> String.concat(",\n")
+  |> str => "{\n" ++ str ++ "\n}"
+};
 
 let rec register = (x: term, set: unifier_set) => {
   open CompSet;

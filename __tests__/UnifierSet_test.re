@@ -68,4 +68,12 @@ describe("Expect", () => {
     let u = from_list([p1, p2]);
     expect(u |> unify(p1, p2)) |> toEqual(None)
   });
+
+  test("unification of two predicates works", () => {
+    let fact = Pred("likes", [atom("ted"), atom("matt")]);
+    let query = Pred("likes", [atom("ted"), Var("X")]);
+    let u = from_list([fact, query]);
+    let ans = u |> unify(atom("matt"), Var("X"));
+    expect(u |> unify(fact, query)) |> toEqual(ans)
+  });
 });
