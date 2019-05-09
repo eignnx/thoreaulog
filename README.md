@@ -1,18 +1,13 @@
-# Basic Reason Template
+# Thoreaulog
+A simple Prolog implementation written in ReasonML. Use it in your web applications!
 
-Hello! This project allows you to quickly get started with Reason and BuckleScript. If you wanted a more sophisticated version, try the `react` template (`bsb -theme react -init .`).
-
-# Build
+## Build
 ```
 npm run build
 ```
 
-# Build + Watch
-
+## Run Tests
+Requires `jest` is installed on your system (`$ which jest` should return something).
 ```
-npm run start
+npm test
 ```
-
-
-# Editor
-If you use `vscode`, Press `Windows + Shift + B` it will build automatically
