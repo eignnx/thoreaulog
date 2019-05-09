@@ -106,7 +106,7 @@ let rec unify = (x, y, set) => {
   | (Comp(head_a, _), Comp(head_b, _)) when head_a != head_b => None
 
   // If heads match, unification possible if all args unify pairwise.
-  | (Comp(_, args_a), Comp(_, args_b)) => {
+  | (Comp(_, args_a), Comp(_, args_b)) => 
     let reduce = (set_opt, x, y) => Utils.(
       unify(x, y) <$> set_opt
     );
@@ -115,9 +115,5 @@ let rec unify = (x, y, set) => {
     try (List.fold_left2(reduce, Some(set), args_a, args_b)) {
     | Invalid_argument(_) => None // Lists of different lengths.
     }
-  }
-
-  // In all other cases, no way to unify.
-  | _ => None
   }
 };
