@@ -1,13 +1,6 @@
 type comp = Var(string) | Atom(string) | Pred(string, list(comp));
 type node = Root(int) | Child(comp)
 
-module UnifSet = Map.Make({
-  type t = comp;
-  let compare = compare;
-});
-
-type unifier_set = UnifSet.t(node);
-
 let string_of_comp = c => {
   switch c {
   | Var(s) => {j|Var($s)|j}
@@ -23,6 +16,14 @@ let string_of_node = n => {
   }
 };
 
+module CompSet = Map.Make({
+  type t = comp;
+  let compare = compare;
+});
+
+type unifier_set = CompSet.t(node);
+let empty = CompSet.empty;
+
 // let string_of_unifier_set = u => {
 //   let roots = UnifSet.filter((k, v) => switch(v) {
 //     | Root(_) => true
@@ -32,8 +33,30 @@ let string_of_node = n => {
 //   u |> String.concat("\n")
 // };
 
+let rec register = (x: comp, set: unifier_set) => {
+  open CompSet;
+  if (!mem(x, set)) {
+    set |> add(x, Root(1))
+        |> register_subcomps(x)
+   } else {
+    // If `x` is already in the set, do nothing. TODO: Best approach?
+    set
+  }
+}
+and register_all = (list, set) => {
+  open List;
+  open Utils;
+  fold_left(flip(register), set, list)
+}
+and register_subcomps = (x: comp, set: unifier_set) => {
+  switch (x) {
+  | Pred(_, args) => register_all(args, set)
+  | _ => set
+  }
+};
+
 let rec find_root_data = (x: comp, set: unifier_set) => {
-  switch (UnifSet.find(x, set)) {
+  switch (CompSet.find(x, set)) {
   | Root(size) => (x, size)
   | Child(parent) => find_root_data(parent, set)
   }
@@ -66,15 +89,15 @@ let rec unify = (x, y, set) => {
   // the other. This will keep the tree relatively shallow.
   | (Var(_), Var(_)) =>
     set
-      -> UnifSet.add(large_root, Root(sum_sz), _)
-      -> UnifSet.add(small_root, Child(large_root), _)
+      -> CompSet.add(large_root, Root(sum_sz), _)
+      -> CompSet.add(small_root, Child(large_root), _)
       -> Some
 
   // If a Var and a non-Var are unified, make the non-Var the root.
   | (Var(name), comp) | (comp, Var(name)) =>
     set
-      -> UnifSet.add(comp, Root(sum_sz), _)
-      -> UnifSet.add(Var(name), Child(comp), _)
+      -> CompSet.add(comp, Root(sum_sz), _)
+      -> CompSet.add(Var(name), Child(comp), _)
       -> Some
   
   // Two atoms unify if they are called the same thing.

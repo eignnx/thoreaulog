@@ -3,21 +3,22 @@ open Jest;
 open Expect;
 open! Expect.Operators;
 
-open Demo;
+open UnifierSet;
+open! Utils;
 
 module Opt = Belt.Option;
 
 describe("Expect singleton unifier set", () => {
   let foo = Atom("foo");
   let bar = Atom("bar");
-  let u = UnifSet.empty |> UnifSet.add(foo, Root(1));
+  let u = empty |> register(foo);
 
   test("to find its element", () => {
-    expect(UnifSet.find(foo, u)) |> toEqual(Root(1))
+    expect(CompSet.find(foo, u)) |> toEqual(Root(1))
   });
 
   test("to not find some other element", () => {
-    expect(UnifSet.mem(bar, u)) |> toBe(false)
+    expect(CompSet.mem(bar, u)) |> toBe(false)
   });
 });
 
@@ -28,17 +29,7 @@ describe("Expect", () => {
   let bar = Atom("bar");
   let p1 = Pred("likes", [foo, x]);
   let p2 = Pred("likes", [y, bar]);
-  let u = UnifSet.(
-    empty
-    |> add(x, Root(1))
-    |> add(y, Root(1))
-    |> add(foo, Root(1))
-    |> add(bar, Root(1))
-    |> add(p1, Root(1))
-    |> add(p2, Root(1))
-  );
-
-  let (&>) = Belt.Option.flatMap;
+  let u = empty |> register_all([x, y, foo, bar, p1, p2]);
 
   test("`find_root` of a root is itself", () => {
     expect(find_root(x, u)) |> toEqual(x)
@@ -52,7 +43,6 @@ describe("Expect", () => {
   test("direct unification of two atoms to return None", () => {
     expect(u |> unify(foo, bar)) |> toEqual(None)
   });
-
 
   test("indirect unification of two atoms to return None", () => {
     expect(u |> unify(x, foo)
