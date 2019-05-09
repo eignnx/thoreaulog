@@ -1,9 +1,9 @@
-type term = Var(string) | Comp(string, list(term));
+type term = Var(string) | Pred(string, list(term));
 
 let string_of_comp = c => {
   switch c {
   | Var(s) => {j|Var($s)|j}
-  | Comp(s, l) => {j|Comp($s, $l)|j}
+  | Pred(s, l) => {j|Pred($s, $l)|j}
   }
 };
 
@@ -50,7 +50,7 @@ and register_all = (list, set) => {
 }
 and register_subcomps = (x: term, set: unifier_set) => {
   switch (x) {
-  | Comp(_, args) => register_all(args, set)
+  | Pred(_, args) => register_all(args, set)
   | _ => set
   }
 };
@@ -103,10 +103,10 @@ let rec unify = (x, y, set) => {
       -> Some
   
   // If the heads are different, no way to unify.
-  | (Comp(head_a, _), Comp(head_b, _)) when head_a != head_b => None
+  | (Pred(head_a, _), Pred(head_b, _)) when head_a != head_b => None
 
   // If heads match, unification possible if all args unify pairwise.
-  | (Comp(_, args_a), Comp(_, args_b)) => 
+  | (Pred(_, args_a), Pred(_, args_b)) => 
     let reduce = (set_opt, x, y) => Utils.(
       unify(x, y) <$> set_opt
     );

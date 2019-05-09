@@ -8,8 +8,8 @@ open Utils;
 module Opt = Belt.Option;
 
 describe("Expect singleton unifier set", () => {
-  let foo = Comp("foo", []);
-  let bar = Comp("bar", []);
+  let foo = Pred("foo", []);
+  let bar = Pred("bar", []);
   let u = empty |> register(foo);
 
   test("to find its element", () => {
@@ -24,10 +24,10 @@ describe("Expect singleton unifier set", () => {
 describe("Expect", () => {
   let x = Var("x");
   let y = Var("y");
-  let foo = Comp("foo", []);
-  let bar = Comp("bar", []);
-  let p1 = Comp("likes", [foo, x]);
-  let p2 = Comp("likes", [y, bar]);
+  let foo = Pred("foo", []);
+  let bar = Pred("bar", []);
+  let p1 = Pred("likes", [foo, x]);
+  let p2 = Pred("likes", [y, bar]);
   let u = from_list([x, y, foo, bar, p1, p2]);
 
   test("`find_root` of a root is itself", () => {
@@ -63,8 +63,8 @@ describe("Expect", () => {
   });
 
   test("two predicates of different arity don't unify", () => {
-    let p1 = Comp("pred", [foo]);
-    let p2 = Comp("pred", [foo, bar]);
+    let p1 = Pred("pred", [foo]);
+    let p2 = Pred("pred", [foo, bar]);
     let u = from_list([p1, p2]);
     expect(u |> unify(p1, p2)) |> toEqual(None)
   });
