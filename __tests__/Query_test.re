@@ -33,4 +33,36 @@ describe("Expect", () => {
 
         expect(kb |> solve_query(query)) |> toEqual(expected)
     });
+
+    test("two-part, disconnected query to work", () => {
+        let query = [
+            Pred("likes", [atom("ted"), Var("X")]),
+            Pred("likes", [Var("Y"), atom("carrey")])
+        ];
+
+        let ans = [
+            [
+                ("X", atom("matt")),
+                ("Y", atom("jane")),
+            ]
+        ];
+
+        expect(kb |> solve_query(query)) |> toEqual(ans)
+    });
+
+    test("two-part, connected query to work", () => {
+        let query = [
+            Pred("likes", [Var("X"), Var("Y")]),
+            Pred("likes", [Var("Y"), atom("ted")])
+        ];
+
+        let ans = [
+            [
+                ("X", atom("john")),
+                ("Y", atom("jane"))
+            ]
+        ];
+
+        expect(kb |> solve_query(query)) |> toEqual(ans)
+    });
 });
