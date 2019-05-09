@@ -57,4 +57,10 @@ describe("Expect", () => {
       (find_root(y, u), find_root(x, u))
     ) |> toEqual((foo, bar))
   });
+
+  test("registration of compound component registers subcomponents", () => {
+    let u = empty |> register(p1);
+    let expected = empty |> register_all([p1, foo, x]);
+    expect(u) |> toEqual(expected)
+  });
 });
