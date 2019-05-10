@@ -5,11 +5,12 @@ open! Expect.Operators;
 open Query;
 open UnifierSet;
 
+let likes = (a, b) => Pred("likes", [a, b]);
 let kb: knowledge_base = [
-    Pred("likes", [atom("john"), atom("jane")]),
-    Pred("likes", [atom("jane"), atom("carrey")]),
-    Pred("likes", [atom("ted"), atom("matt")]),
-    Pred("likes", [atom("jane"), atom("ted")]),
+    likes(atom("john"), atom("jane")),
+    likes(atom("jane"), atom("carrey")),
+    likes(atom("ted"), atom("matt")),
+    likes(atom("jane"), atom("ted")),
 ];
 
 describe("Expect", () => {
@@ -20,11 +21,11 @@ describe("Expect", () => {
 
     test("one answer for simple query", () => {
         let kb = [
-            Pred("likes", [atom("ted"), atom("matt")]),
+            likes(atom("ted"), atom("matt")),
         ];
 
         let query = Query([
-            Pred("likes", [atom("ted"), Var("X")])
+            likes(atom("ted"), Var("X"))
         ]);
 
         let expected = [
@@ -36,8 +37,8 @@ describe("Expect", () => {
 
     test("two-part, disconnected query to work", () => {
         let query = Query([
-            Pred("likes", [atom("ted"), Var("X")]),
-            Pred("likes", [Var("Y"), atom("carrey")])
+            likes(atom("ted"), Var("X")),
+            likes(Var("Y"), atom("carrey"))
         ]);
 
         let ans = [
@@ -52,8 +53,8 @@ describe("Expect", () => {
 
     test("two-part, connected query to work", () => {
         let query = Query([
-            Pred("likes", [Var("X"), Var("Y")]),
-            Pred("likes", [Var("Y"), atom("ted")])
+            likes(Var("X"), Var("Y")),
+            likes(Var("Y"), atom("ted")),
         ]);
 
         let ans = [
@@ -69,7 +70,6 @@ describe("Expect", () => {
 
 describe("Expect a long string of subqueries", () => {
 
-    let likes = (a, b) => Pred("likes", [a, b]);
     let long_query = [
         likes(atom("john"), Var("A")),  // A = jane
         likes(Var("A"), Var("B")),      // B = ted
