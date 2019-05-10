@@ -119,7 +119,7 @@ let rec unify = (x, y, set) => {
     // If heads match, unification possible if all args unify pairwise.
     | (Pred(_, args_a), Pred(_, args_b)) => 
         let reduce = (set_opt, x, y) => Utils.(
-        unify(x, y) <$> set_opt
+            unify(x, y) <$> set_opt
         );
 
         // Could be left or right fold here, doesn't really matter.
