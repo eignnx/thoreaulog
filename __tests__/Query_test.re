@@ -35,7 +35,6 @@ describe("Expect", () => {
     });
 
     test("two-part, disconnected query to work", () => {
-        Js.log("=======DISCONNECTED=======");
         let query = Query([
             Pred("likes", [atom("ted"), Var("X")]),
             Pred("likes", [Var("Y"), atom("carrey")])
@@ -48,15 +47,10 @@ describe("Expect", () => {
             ]
         ];
 
-        // expect(kb |> solve_query(query)) |> toEqual(ans)
-        let res = kb |> solve_query(query);
-        Js.log("ACTUAL: " ++ string_of_var_mapping_list(res));
-        Js.log("EXPECTED: " ++ string_of_var_mapping_list(ans));
-        expect(res) |> toEqual(ans)
+        expect(kb |> solve_query(query)) |> toEqual(ans)
     });
 
     test("two-part, connected query to work", () => {
-        Js.log("=======CONNECTED=======");
         let query = Query([
             Pred("likes", [Var("X"), Var("Y")]),
             Pred("likes", [Var("Y"), atom("ted")])
@@ -69,9 +63,6 @@ describe("Expect", () => {
             ]
         ];
 
-        let res = kb |> solve_query(query);
-        Js.log("ACTUAL: " ++ string_of_var_mapping_list(res));
-        Js.log("EXPECTED: " ++ string_of_var_mapping_list(ans));
-        expect(res) |> toEqual(ans)
+        expect(kb |> solve_query(query)) |> toEqual(ans)
     });
 });

@@ -73,10 +73,5 @@ let print_unifier_set_list: (string, list(U.unifier_set)) => list(U.unifier_set)
 let solve_query = (query: query, kb: knowledge_base) => {
     let Query(query_comps) = query;
     let unifs = kb |> U.from_list |> U.register_all(query_comps);
-
-    let _ = print_unifier_set_list("BEFORE", [unifs]);
-    
-    solve(query, unifs, kb)
-    |> print_unifier_set_list("AFTER")
-    |> List.map(mappings(query))
+    solve(query, unifs, kb) |> List.map(mappings(query))
 };
