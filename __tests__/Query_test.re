@@ -124,3 +124,66 @@ describe("Expect a long string of subqueries", () => {
         expect(kb |> solve_query(query)) |> toEqual(ans)
     });
 });
+
+describe("Expect queries on family tree knowledgebase", () => {
+    let kb: knowledge_base = {
+        let parent = (p, c) => Pred("parent", [atom(p), atom(c)]);
+        [
+            parent("shmi", "anakin"),
+            parent("anakin", "luke"),
+            parent("anakin", "leah"),
+            parent("padme", "luke"),
+            parent("padme", "leah"),
+            parent("leah", "kylo"),
+            parent("han", "kylo"),
+        ]
+    };
+
+    let parent = (p, c) => Pred("parent", [p, c]);
+    let sort = {
+        let cmp_fst = ((x, _), (y, _)) => compare(x, y);
+        List.sort(cmp_fst)
+    };
+
+    test("can find great-grandparent", () => {
+        let query = Query([
+            parent(Var("Parent"), atom("kylo")),
+            parent(Var("Grandparent"), Var("Parent")),
+            parent(Var("GreatGrandparent"), Var("Grandparent")),
+        ]);
+
+        let ans = {
+            [
+                sort([
+                    ("Parent", atom("leah")),
+                    ("Grandparent", atom("anakin")),
+                    ("GreatGrandparent", atom("shmi")),
+                ])
+            ]
+        };
+
+        expect(kb |> solve_query(query)) |> toEqual(ans)
+    });
+
+    test("can find all grandparents of kylo", () => {
+        let query = Query([
+            parent(Var("Parent"), atom("kylo")),
+            parent(Var("Grandparent"), Var("Parent")),
+        ]);
+
+        let ans = {
+            [
+                sort([
+                    ("Parent", atom("leah")),
+                    ("Grandparent", atom("anakin")),
+                ]),
+                sort([
+                    ("Parent", atom("leah")),
+                    ("Grandparent", atom("padme")),
+                ])
+            ]
+        };
+
+        expect(kb |> solve_query(query)) |> toEqual(ans)
+    });
+});
