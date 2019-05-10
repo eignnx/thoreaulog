@@ -9,7 +9,10 @@ let string_of_string_list = list => {
 }
 
 // Tail recursive!
-let flat_map = (f: 'a => list('b), lst: list('a)): list('b) => {
+let flat_map = (
+    f: 'a => list('b),
+    lst: list('a)
+): list('b) => {
     let rec iter = (lst, acc) => {
         switch (lst) {
         | [] => acc

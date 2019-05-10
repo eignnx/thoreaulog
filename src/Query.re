@@ -4,8 +4,11 @@ type fact = U.term;
 type knowledge_base = list(fact);
 type query = Query(list(U.term));
 
-let rec solve: (query, U.unifier_set, knowledge_base) => list(U.unifier_set)
-= (query, unifs, kb) => {
+let rec solve = (
+    query: query,
+    unifs: U.unifier_set,
+    kb: knowledge_base,
+): list(U.unifier_set) => {
     switch (query) {
     | Query([]) => [unifs]
     | Query([subgoal, ...subgoals]) =>
@@ -56,8 +59,10 @@ let mappings: (query, U.unifier_set) => var_mapping = (query, unifs) => {
     |> Belt.List.keepMap(_, key_value)
 };
 
-let print_unifier_set_list: (string, list(U.unifier_set)) => list(U.unifier_set)
-= (msg, ulist) => {
+let print_unifier_set_list = (
+    msg: string,
+    ulist: list(U.unifier_set),
+): list(U.unifier_set) => {
     if (List.length(ulist) == 0) {
         Js.log(msg ++ ": []");
     } else {
