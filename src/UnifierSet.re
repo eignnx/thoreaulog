@@ -129,3 +129,12 @@ let rec unify = (x, y, set) => {
     }
   }
 };
+
+let rec concretize: (term, unifier_set) => term = (term, unifs) => {
+  switch (unifs |> find_root(term)) {
+  | Var(x) => Var(x)
+  | Pred(head, body) =>
+    let new_body = List.map(concretize(_, unifs), body);
+    Pred(head, new_body)
+  }
+};

@@ -6,7 +6,7 @@ open Query;
 open UnifierSet;
 
 describe("Expect", () => {
-    let kb: list(term) = [
+    let kb: knowledge_base = [
         Pred("likes", [atom("john"), atom("jane")]),
         Pred("likes", [atom("jane"), atom("carrey")]),
         Pred("likes", [atom("ted"), atom("matt")]),
@@ -14,8 +14,8 @@ describe("Expect", () => {
     ];
 
     test("no substitutions for an empty query", () => {
-        let query = [];
-        expect(kb |> solve_query(query)) |> toEqual([])
+        let query = Query([]);
+        expect(kb |> solve_query(query)) |> toEqual([[]])
     });
 
     test("one answer for simple query", () => {
@@ -23,9 +23,9 @@ describe("Expect", () => {
             Pred("likes", [atom("ted"), atom("matt")]),
         ];
 
-        let query = [
+        let query = Query([
             Pred("likes", [atom("ted"), Var("X")])
-        ];
+        ]);
 
         let expected = [
             [("X", atom("matt"))]
@@ -35,10 +35,11 @@ describe("Expect", () => {
     });
 
     test("two-part, disconnected query to work", () => {
-        let query = [
+        Js.log("=======DISCONNECTED=======");
+        let query = Query([
             Pred("likes", [atom("ted"), Var("X")]),
             Pred("likes", [Var("Y"), atom("carrey")])
-        ];
+        ]);
 
         let ans = [
             [
@@ -47,22 +48,30 @@ describe("Expect", () => {
             ]
         ];
 
-        expect(kb |> solve_query(query)) |> toEqual(ans)
+        // expect(kb |> solve_query(query)) |> toEqual(ans)
+        let res = kb |> solve_query(query);
+        Js.log("ACTUAL: " ++ string_of_var_mapping_list(res));
+        Js.log("EXPECTED: " ++ string_of_var_mapping_list(ans));
+        expect(res) |> toEqual(ans)
     });
 
     test("two-part, connected query to work", () => {
-        let query = [
+        Js.log("=======CONNECTED=======");
+        let query = Query([
             Pred("likes", [Var("X"), Var("Y")]),
             Pred("likes", [Var("Y"), atom("ted")])
-        ];
+        ]);
 
         let ans = [
             [
                 ("X", atom("john")),
-                ("Y", atom("jane"))
+                ("Y", atom("jane")),
             ]
         ];
 
-        expect(kb |> solve_query(query)) |> toEqual(ans)
+        let res = kb |> solve_query(query);
+        Js.log("ACTUAL: " ++ string_of_var_mapping_list(res));
+        Js.log("EXPECTED: " ++ string_of_var_mapping_list(ans));
+        expect(res) |> toEqual(ans)
     });
 });
