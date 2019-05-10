@@ -124,3 +124,65 @@ describe("Expect a long string of subqueries", () => {
         expect(kb |> solve_query(query)) |> toEqual(ans)
     });
 });
+
+describe("Expect complex knowledgebase", () => {
+    let kb: knowledge_base = {
+        let parent = (p, c) => Pred("parent", [atom(p), atom(c)]);
+        [
+            parent("shmi", "anakin"),
+            parent("anakin", "luke"),
+            parent("anakin", "leah"),
+            parent("padme", "luke"),
+            parent("padme", "leah"),
+            parent("leah", "kylo"),
+            parent("han", "kylo"),
+        ]
+    };
+
+    test("finds great-grandparent", () => {
+        let parent = (p, c) => Pred("parent", [p, c]);
+        let query = Query([
+            parent(Var("Parent"), atom("kylo")),
+            parent(Var("Grandparent"), Var("Parent")),
+            parent(Var("GreatGrandparent"), Var("Grandparent")),
+        ]);
+
+        let ans = {
+            let cmp_fst = ((x, _), (y, _)) => compare(x, y);
+            [
+                List.sort(cmp_fst, [
+                    ("Parent", atom("leah")),
+                    ("Grandparent", atom("anakin")),
+                    ("GreatGrandparent", atom("shmi")),
+                ])
+            ]
+        };
+
+        expect(kb |> solve_query(query)) |> toEqual(ans)
+    });
+
+    test("finds all grandparents of kylo", () => {
+        let parent = (p, c) => Pred("parent", [p, c]);
+        let query = Query([
+            parent(Var("Parent"), atom("kylo")),
+            parent(Var("Grandparent"), Var("Parent")),
+        ]);
+
+        let ans = {
+            let cmp_fst = ((x, _), (y, _)) => compare(x, y);
+            let sort = List.sort(cmp_fst);
+            [
+                sort([
+                    ("Parent", atom("leah")),
+                    ("Grandparent", atom("anakin")),
+                ]),
+                sort([
+                    ("Parent", atom("leah")),
+                    ("Grandparent", atom("padme")),
+                ])
+            ]
+        };
+
+        expect(kb |> solve_query(query)) |> toEqual(ans)
+    });
+});
