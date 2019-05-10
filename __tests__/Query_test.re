@@ -68,6 +68,25 @@ describe("Expect", () => {
     });
 });
 
+describe("Expect to find multiple solutions", () => {
+    test("in simple case", () => {
+        let query = Query([
+            likes(atom("jane"), Var("X")),
+        ]);
+        
+        let ans = [
+            [
+                ("X", atom("carrey"))
+            ],
+            [
+                ("X", atom("ted"))
+            ]
+        ];
+
+        expect(kb |> solve_query(query)) |> toEqual(ans)
+    });
+});
+
 describe("Expect a long string of subqueries", () => {
 
     let long_query = [
