@@ -110,7 +110,7 @@ describe("Expect a long string of subqueries", () => {
 
     test("with extraneous fact to work", () => {
         let query = Query([
-            likes(Var("A"), atom("carry")), // Extraneous fact!
+            likes(Var("A"), atom("carrey")), // Extraneous fact!
             ...long_query
         ]);
 
