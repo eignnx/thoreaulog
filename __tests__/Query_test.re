@@ -5,14 +5,14 @@ open! Expect.Operators;
 open Query;
 open UnifierSet;
 
-describe("Expect", () => {
-    let kb: knowledge_base = [
-        Pred("likes", [atom("john"), atom("jane")]),
-        Pred("likes", [atom("jane"), atom("carrey")]),
-        Pred("likes", [atom("ted"), atom("matt")]),
-        Pred("likes", [atom("jane"), atom("ted")]),
-    ];
+let kb: knowledge_base = [
+    Pred("likes", [atom("john"), atom("jane")]),
+    Pred("likes", [atom("jane"), atom("carrey")]),
+    Pred("likes", [atom("ted"), atom("matt")]),
+    Pred("likes", [atom("jane"), atom("ted")]),
+];
 
+describe("Expect", () => {
     test("no substitutions for an empty query", () => {
         let query = Query([]);
         expect(kb |> solve_query(query)) |> toEqual([[]])
@@ -60,6 +60,45 @@ describe("Expect", () => {
             [
                 ("X", atom("john")),
                 ("Y", atom("jane")),
+            ]
+        ];
+
+        expect(kb |> solve_query(query)) |> toEqual(ans)
+    });
+});
+
+describe("Expect a long string of subqueries", () => {
+
+    let likes = (a, b) => Pred("likes", [a, b]);
+    let long_query = [
+        likes(atom("john"), Var("A")),  // A = jane
+        likes(Var("A"), Var("B")),      // B = ted
+        likes(Var("B"), atom("matt")),
+    ];
+
+    test("to work", () => {
+        let query = Query(long_query);
+
+        let ans = [
+            [
+                ("A", atom("jane")),
+                ("B", atom("ted")),
+            ]
+        ];
+
+        expect(kb |> solve_query(query)) |> toEqual(ans)
+    });
+
+    test("with extraneous fact to work", () => {
+        let query = Query([
+            likes(Var("A"), atom("carry")), // Extraneous fact!
+            ...long_query
+        ]);
+
+        let ans = [
+            [
+                ("A", atom("jane")),
+                ("B", atom("ted")),
             ]
         ];
 
