@@ -77,3 +77,24 @@ describe("Expect", () => {
         expect(u |> unify(fact, query)) |> toEqual(ans)
     });
 });
+
+describe("Expect concretization to work", () => {
+    test("in simple case", () => {
+        let jane = atom("jane");
+        let unifs = from_list([jane]);
+        expect(unifs |> concretize(jane)) |> toEqual(jane)
+    });
+
+    test("in complex case", () => {
+        let jane = atom("jane");
+        let john = atom("john");
+        let p1 = Pred("likes", [Var("X"), jane]);
+
+        let unifs = from_list([jane, john, p1])
+            |> unify(Var("X"), john)
+            |> Opt.getExn;
+        
+        let ans = Pred("likes", [john, jane]);
+        expect(concretize(p1, unifs)) |> toEqual(ans)
+    });
+});
