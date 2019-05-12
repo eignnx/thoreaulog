@@ -15,7 +15,7 @@ let kb: knowledge_base = [
 
 describe("Expect", () => {
     test("no substitutions for an empty query", () => {
-        let query = Query([]);
+        let query: query = And([]);
         expect(kb |> solve_query(query)) |> toEqual([[]])
     });
 
@@ -24,8 +24,8 @@ describe("Expect", () => {
             likes(atom("ted"), atom("matt")),
         ];
 
-        let query = Query([
-            likes(atom("ted"), Var("X"))
+        let query = And([
+            likes(atom("ted"), Var("X")) -> Term
         ]);
 
         let expected = [
@@ -36,9 +36,9 @@ describe("Expect", () => {
     });
 
     test("two-part, disconnected query to work", () => {
-        let query = Query([
-            likes(atom("ted"), Var("X")),
-            likes(Var("Y"), atom("carrey"))
+        let query = And([
+            likes(atom("ted"), Var("X")) -> Term,
+            likes(Var("Y"), atom("carrey")) -> Term,
         ]);
 
         let ans = [
@@ -52,9 +52,9 @@ describe("Expect", () => {
     });
 
     test("two-part, connected query to work", () => {
-        let query = Query([
-            likes(Var("X"), Var("Y")),
-            likes(Var("Y"), atom("ted")),
+        let query = And([
+            likes(Var("X"), Var("Y")) -> Term,
+            likes(Var("Y"), atom("ted")) -> Term,
         ]);
 
         let ans = [
@@ -70,8 +70,8 @@ describe("Expect", () => {
 
 describe("Expect to find multiple solutions", () => {
     test("in simple case", () => {
-        let query = Query([
-            likes(atom("jane"), Var("X")),
+        let query = And([
+            likes(atom("jane"), Var("X")) -> Term,
         ]);
         
         let ans = [
@@ -90,13 +90,13 @@ describe("Expect to find multiple solutions", () => {
 describe("Expect a long string of subqueries", () => {
 
     let long_query = [
-        likes(atom("john"), Var("A")),  // A = jane
-        likes(Var("A"), Var("B")),      // B = ted
-        likes(Var("B"), atom("matt")),
+        likes(atom("john"), Var("A")) -> Term,  // A = jane
+        likes(Var("A"), Var("B")) -> Term,      // B = ted
+        likes(Var("B"), atom("matt")) -> Term,
     ];
 
     test("to work", () => {
-        let query = Query(long_query);
+        let query = And(long_query);
 
         let ans = [
             [
@@ -109,8 +109,8 @@ describe("Expect a long string of subqueries", () => {
     });
 
     test("with extraneous fact to work", () => {
-        let query = Query([
-            likes(Var("A"), atom("carrey")), // Extraneous fact!
+        let query = And([
+            likes(Var("A"), atom("carrey")) -> Term, // Extraneous fact!
             ...long_query
         ]);
 
@@ -146,10 +146,10 @@ describe("Expect queries on family tree knowledgebase", () => {
     };
 
     test("can find great-grandparent", () => {
-        let query = Query([
-            parent(Var("Parent"), atom("kylo")),
-            parent(Var("Grandparent"), Var("Parent")),
-            parent(Var("GreatGrandparent"), Var("Grandparent")),
+        let query = And([
+            parent(Var("Parent"), atom("kylo")) -> Term,
+            parent(Var("Grandparent"), Var("Parent")) -> Term,
+            parent(Var("GreatGrandparent"), Var("Grandparent")) -> Term,
         ]);
 
         let ans = {
@@ -166,9 +166,9 @@ describe("Expect queries on family tree knowledgebase", () => {
     });
 
     test("can find all grandparents of kylo", () => {
-        let query = Query([
-            parent(Var("Parent"), atom("kylo")),
-            parent(Var("Grandparent"), Var("Parent")),
+        let query = And([
+            parent(Var("Parent"), atom("kylo")) -> Term,
+            parent(Var("Grandparent"), Var("Parent")) -> Term,
         ]);
 
         let ans = {
