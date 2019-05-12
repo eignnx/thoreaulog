@@ -8,7 +8,7 @@ let rec solve = (
     query: query,
     unifs: U.unifier_set,
     kb: knowledge_base,
-): list(U.unifier_set) => {
+): Solution.t => {
     switch (query) {
     | Query([]) => [unifs]
     | Query([subgoal, ...subgoals]) =>
@@ -27,23 +27,7 @@ let rec vars_in: query => list(string) = fun
 | Query([Pred(_, inner), ...rest]) => vars_in(Query(inner)) @ vars_in(Query(rest))
 ;
 
-type var_mapping = list((string, U.term))
-
-let string_of_var_mapping: var_mapping => string = vm => {
-    vm
-    |> List.map(((str, term)) => str ++ " => " ++ U.string_of_term(term))
-    |> String.concat(", ")
-    |> str => {j|[$str]|j}
-};
-
-let string_of_var_mapping_list: list(var_mapping) => string = vml => {
-    vml
-    |> List.map(string_of_var_mapping)
-    |> String.concat(", ")
-    |> str => {j|[$str]|j}
-};
-
-let mappings: (query, U.unifier_set) => var_mapping = (query, unifs) => {
+let mappings: (query, U.unifier_set) => VarMapping.t = (query, unifs) => {
     let var_names = vars_in(query);
     let key_value = name => {
         let varia = U.Var(name);
@@ -59,23 +43,7 @@ let mappings: (query, U.unifier_set) => var_mapping = (query, unifs) => {
     |> Belt.List.keepMap(_, key_value)
 };
 
-let print_unifier_set_list = (
-    msg: string,
-    ulist: list(U.unifier_set),
-): list(U.unifier_set) => {
-    if (List.length(ulist) == 0) {
-        Js.log(msg ++ ": []");
-    } else {
-        ulist
-        |> List.map(unifs => U.string_of_unifier_set(unifs))
-        |> String.concat(",\n")
-        |> str => {j|$msg: [$str]|j}
-        |> Js.log
-    };
-    ulist
-};
-
-let solve_query = (query: query, kb: knowledge_base) => {
+let solve_query = (query: query, kb: knowledge_base): list(VarMapping.t) => {
     let Query(query_comps) = query;
     let unifs = kb |> U.from_list |> U.register_all(query_comps);
     solve(query, unifs, kb) |> List.map(mappings(query))
