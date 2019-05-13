@@ -22,9 +22,9 @@ let flat_map = (
     iter(lst, [])
 };
 
-let subset = (small: list('a), big: list('a)): bool => {
+let strict_superset = (small: list('a), big: list('a)): bool => {
     open List;
-    !exists(sm => mem(sm, big), small)
+    !exists(b => mem(b, small), big)
 };
 
-let (*<=*) = subset;
+let (<:) = strict_superset;

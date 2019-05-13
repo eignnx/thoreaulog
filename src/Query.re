@@ -103,7 +103,7 @@ let validate = query => {
             // Then check `qs`, but use the vars defined in `q` as well.
             iter(And(qs), vars_in_query(q) @ seen_vars)
         | Not(q) =>
-            if (Utils.(vars_in_query(q) *<=* seen_vars)) {
+            if (Utils.(seen_vars <: vars_in_query(q))) {
                 let msg = "Variables must be bound BEFORE appearing in a `not` predicate!";
                 raise(Invalid_query(msg))
             } else {
