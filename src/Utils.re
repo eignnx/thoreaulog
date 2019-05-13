@@ -21,3 +21,10 @@ let flat_map = (
     };
     iter(lst, [])
 };
+
+let subset = (small: list('a), big: list('a)): bool => {
+    open List;
+    !exists(sm => mem(sm, big), small)
+};
+
+let (*<=*) = subset;

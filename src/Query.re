@@ -91,7 +91,31 @@ let rec terms_in: query => list(U.term) = fun
 | Not(q) => terms_in(q)
 ;
 
+exception Invalid_query(string);
+
+let validate = query => {
+    let rec iter = (q: query, seen_vars: list(string)) => {
+        switch (q) {
+        | Term(_) | And([]) => ()
+        | And([q, ...qs]) =>
+            // First, recurse into `q` with `seen_vars`.
+            iter(q, seen_vars);
+            // Then check `qs`, but use the vars defined in `q` as well.
+            iter(And(qs), vars_in_query(q) @ seen_vars)
+        | Not(q) =>
+            if (Utils.(vars_in_query(q) *<=* seen_vars)) {
+                let msg = "Variables must be bound BEFORE appearing in a `not` predicate!";
+                raise(Invalid_query(msg))
+            } else {
+                iter(q, seen_vars)
+            }
+        }
+    };
+    iter(query, []);
+};
+
 let solve_query = (query: query, kb: knowledge_base): list(VarMapping.t) => {
+    validate(query);
     let query_comps = terms_in(query);
     let unifs = kb |> U.from_list |> U.register_all(query_comps);
     solve(query, unifs, kb) |> List.map(mappings(query))

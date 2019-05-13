@@ -199,4 +199,14 @@ describe("Expect queries on family tree knowledgebase", () => {
 
         expect(kb |> solve_query(query)) |> toEqual(ans)
     });
+
+    test("will throw an error when a `not` defines a variable", () => {
+        let query = And([
+            Not(parent(atom("anakin"), Var("Parent")) -> Term),
+            parent(Var("Parent"), atom("kylo")) -> Term,
+        ]);
+
+        let msg = "Variables must be bound BEFORE appearing in a `not` predicate!";
+        expect(() => kb |> solve_query(query)) |> toThrowException(Invalid_query(msg))
+    });
 });
