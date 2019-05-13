@@ -68,8 +68,13 @@ and register_subcomps = (x: term, set: unifier_set) => {
 
 let from_list = list => empty |> register_all(list);
 
+exception Unknown_term(string);
+
 let rec find_root_data = (x: term, set: unifier_set) => {
-    switch (CompSet.find(x, set)) {
+    let res = try (CompSet.find(x, set)) {
+    | Not_found => raise(Unknown_term(string_of_term(x)))
+    };
+    switch (res) {
     | Root(size) => (x, size)
     | Child(parent) => find_root_data(parent, set)
     }

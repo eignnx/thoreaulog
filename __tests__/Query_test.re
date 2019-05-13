@@ -171,18 +171,31 @@ describe("Expect queries on family tree knowledgebase", () => {
             parent(Var("Grandparent"), Var("Parent")) -> Term,
         ]);
 
-        let ans = {
+        let ans = [
+            sort([
+                ("Parent", atom("leah")),
+                ("Grandparent", atom("anakin")),
+            ]),
+            sort([
+                ("Parent", atom("leah")),
+                ("Grandparent", atom("padme")),
+            ])
+        ];
+
+        expect(kb |> solve_query(query)) |> toEqual(ans)
+    });
+
+    test("can find every parent of kylo who is not the child of anakin", () => {
+        let query = And([
+            parent(Var("Parent"), atom("kylo")) -> Term,
+            Not(parent(atom("anakin"), Var("Parent")) -> Term)
+        ]);
+
+        let ans = [
             [
-                sort([
-                    ("Parent", atom("leah")),
-                    ("Grandparent", atom("anakin")),
-                ]),
-                sort([
-                    ("Parent", atom("leah")),
-                    ("Grandparent", atom("padme")),
-                ])
+                ("Parent", atom("han"))
             ]
-        };
+        ];
 
         expect(kb |> solve_query(query)) |> toEqual(ans)
     });

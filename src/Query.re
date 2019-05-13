@@ -6,7 +6,7 @@ type knowledge_base = list(fact);
 type query =
     | Term(U.term)
     | And(list(query))
-    | Not(U.term)
+    | Not(query)
     ;
 
 let rec solve = (
@@ -17,7 +17,7 @@ let rec solve = (
     switch (query) {
     | Term(term) => solve_term(term, unifs, kb)
     | And(subgoals) => solve_and(subgoals, unifs, kb)
-    | Not(subgoal) => [] // TODO: implement
+    | Not(subgoal) => solve_not(subgoal, unifs, kb)
     }
 }
 and solve_term = (
@@ -41,6 +41,16 @@ and solve_and = (
         // solving `subgoals` using each of the possible `unifier_set`s.
         solve(subgoal, unifs, kb) |> Utils.flat_map(unifs => solve_and(subgoals, unifs, kb))
     };
+}
+and solve_not = (
+    query: query,
+    unifs: U.unifier_set,
+    kb: knowledge_base,
+): Solution.t => {
+    switch (solve(query, unifs, kb)) {
+    | [] => [unifs] // Is this correct?
+    | _ => [] // OPTIMIZE: We only need one counter-example, so if ONE is found we can stop.
+    }
 };
 
 let rec vars_in_query: query => list(string) = fun
@@ -78,7 +88,7 @@ let rec terms_in: query => list(U.term) = fun
 | Term(t) => [t]
 | And([]) => []
 | And([q, ...qs]) => terms_in(q) @ terms_in(And(qs))
-| Not(_) => [] // TODO: Implement
+| Not(q) => terms_in(q)
 ;
 
 let solve_query = (query: query, kb: knowledge_base): list(VarMapping.t) => {
