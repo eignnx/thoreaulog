@@ -9,9 +9,10 @@ kb.addFact("likes", ["darcy", "carrie"]);
 kb.addFact("likes", ["carrie", "darcy"]);
 
 const likes = (a, b) => Query.Term(Term.Pred("likes", [a, b]));
+const [X, Y] = [Term.Var("X"), Term.Var("Y")];
+
 const q = Query.And([
-    likes(Term.Var("X"), Term.Var("Y")),
-    likes(Term.Var("Y"), Term.Var("X")),
+    likes(X, Y), likes(Y, X)
 ]);
 
 const ans = [
@@ -25,7 +26,14 @@ const ans = [
     },
 ];
 
-expect(kb.query(q)).toEqual(ans);
+// Extract answers incrementally...
+kb.query(q);
+const actual = [kb.answer(), kb.answer()];
+expect(actual).toEqual(ans);
+
+// ...or all at once.
+kb.query(q);
+expect(kb.allAnswers()).toEqual(ans);
 ```
 
 ## Build
