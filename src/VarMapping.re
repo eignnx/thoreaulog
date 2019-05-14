@@ -1,6 +1,6 @@
 module U = UnifierSet;
 
-type t = list((string, U.term))
+type t = list((string, U.term));
 
 let to_string: t => string = vm => {
     vm
