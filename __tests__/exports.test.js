@@ -46,20 +46,16 @@ describe("`Query` constructors and methods", () => {
 });
 
 describe("`KnowledgeBase` objects", () => {
-    let likes = (a, b) => Term.Pred("likes", [Term.Atom(a), Term.Atom(b)]);
-
-    const kb = new KnowledgeBase([
-        likes("carrie", "darcy"),
-        likes("darcy", "carrie"),
-    ]);
-
-    likes = (a, b) => Term.Pred("likes", [a, b])
+    const kb = new KnowledgeBase();
+    kb.addFact("likes", ["darcy", "carrie"]);
+    kb.addFact("likes", ["carrie", "darcy"]);
 
     test("solve correctly", () => {
-        const query = Query.And([
+        const likes = (a, b) => Query.Term(Term.Pred("likes", [a, b]));
+        const q = Query.And([
             likes(Term.Var("X"), Term.Var("Y")),
             likes(Term.Var("Y"), Term.Var("X")),
-        ].map(Query.Term));
+        ]);
 
         const ans = [
             {
@@ -72,6 +68,6 @@ describe("`KnowledgeBase` objects", () => {
             },
         ];
 
-        expect(kb.query(query)).toEqual(ans);
+        expect(kb.query(q)).toEqual(ans);
     });
 });

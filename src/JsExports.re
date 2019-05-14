@@ -47,5 +47,8 @@ let solve = (
 
 // <UNIFIERSET> ///////////////////////////////////////////////////////////
 let register_facts = U.from_list;
+let register_fact = U.register;
 let regiter_query = Q.register_query;
 // </UNIFIERSET> //////////////////////////////////////////////////////////
+
+let cons = (x, xs) => [x, ...xs];

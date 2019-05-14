@@ -4,36 +4,28 @@ A simple Prolog implementation written in ReasonML. Use it in your web applicati
 ## Example
 
 ```javascript
-describe("`KnowledgeBase` objects", () => {
-    let likes = (a, b) => Term.Pred("likes", [Term.Atom(a), Term.Atom(b)]);
+const kb = new KnowledgeBase();
+kb.addFact("likes", ["darcy", "carrie"]);
+kb.addFact("likes", ["carrie", "darcy"]);
 
-    const kb = new KnowledgeBase([
-        likes("carrie", "darcy"),
-        likes("darcy", "carrie"),
-    ]);
+const likes = (a, b) => Query.Term(Term.Pred("likes", [a, b]));
+const q = Query.And([
+    likes(Term.Var("X"), Term.Var("Y")),
+    likes(Term.Var("Y"), Term.Var("X")),
+]);
 
-    likes = (a, b) => Term.Pred("likes", [a, b])
+const ans = [
+    {
+        "X": Term.Atom("carrie"),
+        "Y": Term.Atom("darcy"),
+    },
+    {
+        "X": Term.Atom("darcy"),
+        "Y": Term.Atom("carrie"),
+    },
+];
 
-    test("solve correctly", () => {
-        const query = Query.And([
-            likes(Term.Var("X"), Term.Var("Y")),
-            likes(Term.Var("Y"), Term.Var("X")),
-        ].map(Query.Term));
-
-        const ans = [
-            {
-                "X": Term.Atom("carrie"),
-                "Y": Term.Atom("darcy"),
-            },
-            {
-                "X": Term.Atom("darcy"),
-                "Y": Term.Atom("carrie"),
-            },
-        ];
-
-        expect(kb.query(query)).toEqual(ans);
-    });
-});
+expect(kb.query(q)).toEqual(ans);
 ```
 
 ## Build
