@@ -42,8 +42,31 @@ class KnowledgeBase {
 
     query(query) {
         const unifs = E.regiter_query(query, this.baseUnifs);
-        const results = E.solve(query, unifs, this.kb);
-        return results.map(objectFromEntries);
+        this.answers = E.solve(query, unifs, this.kb);
+        return this.answers;
+    }
+
+    answer() {
+        if (!this.answers) return undefined;
+        const res = E.sequence_next(this.answers);
+        if (res) {
+            const [ans, next] = res;
+            this.answers = next;
+            return objectFromEntries(ans);
+        } else {
+            this.answers = undefined;
+            return undefined;
+        }
+    }
+
+    allAnswers() {
+        if (!this.answers) return undefined;
+        let results = [];
+        let x;
+        while (x = this.answer()) {
+            results.push(x);
+        }
+        return results;
     }
 }
 

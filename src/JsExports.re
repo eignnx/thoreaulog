@@ -34,16 +34,10 @@ let solve = (
     query: Q.query,
     unifs: U.unifier_set,
     kb: Q.knowledge_base,
-): array(array((string, U.term))) => {
+): Seq.t(array((string, U.term))) => {
     Q.validate(query);
-    Q.solve(query, unifs, kb)
-    |> Seq.map(soln => {
-        soln
-        |> Q.mappings(query)
-        |> Array.of_list
-    })
-    |> Seq.to_list
-    |> Array.of_list
+    let into_pairs = soln => soln |> Q.mappings(query) |> Array.of_list;
+    Q.solve(query, unifs, kb) |> Seq.map(into_pairs)
 };
 // </QUERY> //////////////////////////////////////////////////////////
 
@@ -54,3 +48,10 @@ let regiter_query = Q.register_query;
 // </UNIFIERSET> //////////////////////////////////////////////////////////
 
 let cons = (x, xs) => [x, ...xs];
+
+let sequence_next: Seq.t('a) => option(('a, Seq.t('a))) = seq => {
+    switch (seq()) {
+    | Seq.Nil => None
+    | Seq.Cons(x, next) => Some((x, next))
+    }
+};

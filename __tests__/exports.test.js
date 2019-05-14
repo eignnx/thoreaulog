@@ -50,24 +50,37 @@ describe("`KnowledgeBase` objects", () => {
     kb.addFact("likes", ["darcy", "carrie"]);
     kb.addFact("likes", ["carrie", "darcy"]);
 
-    test("solve correctly", () => {
-        const likes = (a, b) => Query.Term(Term.Pred("likes", [a, b]));
-        const q = Query.And([
-            likes(Term.Var("X"), Term.Var("Y")),
-            likes(Term.Var("Y"), Term.Var("X")),
-        ]);
+    const likes = (a, b) => Query.Term(Term.Pred("likes", [a, b]));
+    const [X, Y] = [Term.Var("X"), Term.Var("Y")];
 
-        const ans = [
-            {
-                "X": Term.Atom("carrie"),
-                "Y": Term.Atom("darcy"),
-            },
-            {
-                "X": Term.Atom("darcy"),
-                "Y": Term.Atom("carrie"),
-            },
+    const q = Query.And([
+        likes(X, Y), likes(Y, X)
+    ]);
+
+    const ans = [
+        {
+            "X": Term.Atom("carrie"),
+            "Y": Term.Atom("darcy"),
+        },
+        {
+            "X": Term.Atom("darcy"),
+            "Y": Term.Atom("carrie"),
+        },
+    ];
+
+    test("solve correctly when extracting answers one-by-one", () => {
+        kb.query(q);
+
+        const actual = [
+            kb.answer(),
+            kb.answer(),
         ];
 
-        expect(kb.query(q)).toEqual(ans);
+        expect(actual).toEqual(ans);
+    });
+
+    test("solve correctly when extracting all answers at once", () => {
+        kb.query(q);
+        expect(kb.allAnswers()).toEqual(ans);
     });
 });
