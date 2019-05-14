@@ -14,6 +14,11 @@ let kb: knowledge_base = [
 ];
 
 describe("Expect", () => {
+    test("no solutions for a random query", () => {
+        let query = Term(Pred("cxzxcixzchzxgcx", []));
+        expect(kb |> solve_query(query) |> Seq.to_list) |> toEqual([])
+    });
+
     test("no substitutions for an empty query", () => {
         let query: query = And([]);
         expect(kb |> solve_query(query) |> Seq.to_list) |> toEqual([[]])
