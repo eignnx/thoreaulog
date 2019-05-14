@@ -35,6 +35,7 @@ let solve = (
     unifs: U.unifier_set,
     kb: Q.knowledge_base,
 ): array(array((string, U.term))) => {
+    Q.validate(query);
     Q.solve(query, unifs, kb)
     |> List.map(soln => {
         soln
