@@ -9,6 +9,16 @@ type query =
     | Not(query)
     ;
 
+let rec string_of_query: query => string = fun
+| Term(t) => U.string_of_term(t)
+| And(qs) =>
+    qs
+    |> List.map(string_of_query)
+    |> String.concat(", ")
+    |> str => "(" ++ str ++ ")"
+| Not(q) => "not(" ++ string_of_query(q) ++ ")"
+;
+
 let rec solve = (
     query: query,
     unifs: U.unifier_set,
@@ -114,9 +124,12 @@ let validate = query => {
     iter(query, []);
 };
 
+let register_query = (query: query, unifs: U.unifier_set): U.unifier_set => {
+    unifs |> U.register_all(terms_in(query))
+};
+
 let solve_query = (query: query, kb: knowledge_base): list(VarMapping.t) => {
     validate(query);
-    let query_comps = terms_in(query);
-    let unifs = kb |> U.from_list |> U.register_all(query_comps);
+    let unifs = kb |> U.from_list |> register_query(query);
     solve(query, unifs, kb) |> List.map(mappings(query))
 };
