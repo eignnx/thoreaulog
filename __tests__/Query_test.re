@@ -21,7 +21,7 @@ describe("Expect", () => {
 
     test("no substitutions for an empty query", () => {
         let query: query = And([]);
-        expect(kb |> solve_query(query) |> Seq.to_list) |> toEqual([[]])
+        expect(kb |> solve_query(query) |> Seq.to_list) |> toEqual([[||]])
     });
 
     test("one answer for simple query", () => {
@@ -34,7 +34,7 @@ describe("Expect", () => {
         ]);
 
         let expected = [
-            [("X", atom("matt"))]
+            [|("X", atom("matt"))|]
         ];
 
         expect(kb |> solve_query(query) |> Seq.to_list) |> toEqual(expected)
@@ -47,10 +47,10 @@ describe("Expect", () => {
         ]);
 
         let ans = [
-            [
+            [|
                 ("X", atom("matt")),
                 ("Y", atom("jane")),
-            ]
+            |]
         ];
 
         expect(kb |> solve_query(query) |> Seq.to_list) |> toEqual(ans)
@@ -63,10 +63,10 @@ describe("Expect", () => {
         ]);
 
         let ans = [
-            [
+            [|
                 ("X", atom("john")),
                 ("Y", atom("jane")),
-            ]
+            |]
         ];
 
         expect(kb |> solve_query(query) |> Seq.to_list) |> toEqual(ans)
@@ -80,12 +80,12 @@ describe("Expect to find multiple solutions", () => {
         ]);
         
         let ans = [
-            [
+            [|
                 ("X", atom("carrey"))
-            ],
-            [
+            |],
+            [|
                 ("X", atom("ted"))
-            ]
+            |]
         ];
 
         expect(kb |> solve_query(query) |> Seq.to_list) |> toEqual(ans)
@@ -104,10 +104,10 @@ describe("Expect a long string of subqueries", () => {
         let query = And(long_query);
 
         let ans = [
-            [
+            [|
                 ("A", atom("jane")),
                 ("B", atom("ted")),
-            ]
+            |]
         ];
 
         expect(kb |> solve_query(query) |> Seq.to_list) |> toEqual(ans)
@@ -120,10 +120,10 @@ describe("Expect a long string of subqueries", () => {
         ]);
 
         let ans = [
-            [
+            [|
                 ("A", atom("jane")),
                 ("B", atom("ted")),
-            ]
+            |]
         ];
 
         expect(kb |> solve_query(query) |> Seq.to_list) |> toEqual(ans)
@@ -147,7 +147,7 @@ describe("Expect queries on family tree knowledgebase", () => {
     let parent = (p, c) => Pred("parent", [p, c]);
     let sort = {
         let cmp_fst = ((x, _), (y, _)) => compare(x, y);
-        List.sort(cmp_fst)
+        arr => arr |> Array.to_list |> List.sort(cmp_fst) |> Array.of_list
     };
 
     test("can find great-grandparent", () => {
@@ -157,15 +157,13 @@ describe("Expect queries on family tree knowledgebase", () => {
             parent(Var("GreatGrandparent"), Var("Grandparent")) -> Term,
         ]);
 
-        let ans = {
-            [
-                sort([
-                    ("Parent", atom("leah")),
-                    ("Grandparent", atom("anakin")),
-                    ("GreatGrandparent", atom("shmi")),
-                ])
-            ]
-        };
+        let ans = [
+            sort([|
+                ("Parent", atom("leah")),
+                ("Grandparent", atom("anakin")),
+                ("GreatGrandparent", atom("shmi")),
+            |])
+        ];
 
         expect(kb |> solve_query(query) |> Seq.to_list) |> toEqual(ans)
     });
@@ -177,14 +175,14 @@ describe("Expect queries on family tree knowledgebase", () => {
         ]);
 
         let ans = [
-            sort([
+            sort([|
                 ("Parent", atom("leah")),
                 ("Grandparent", atom("anakin")),
-            ]),
-            sort([
+            |]),
+            sort([|
                 ("Parent", atom("leah")),
                 ("Grandparent", atom("padme")),
-            ])
+            |])
         ];
 
         expect(kb |> solve_query(query) |> Seq.to_list) |> toEqual(ans)
@@ -193,13 +191,13 @@ describe("Expect queries on family tree knowledgebase", () => {
     test("can find every parent of kylo who is not the child of anakin", () => {
         let query = And([
             parent(Var("Parent"), atom("kylo")) -> Term,
-            Not(parent(atom("anakin"), Var("Parent")) -> Term)
+            Not(parent(atom("anakin"), Var("Parent")) -> Term),
         ]);
 
         let ans = [
-            [
+            [|
                 ("Parent", atom("han"))
-            ]
+            |]
         ];
 
         expect(kb |> solve_query(query) |> Seq.to_list) |> toEqual(ans)

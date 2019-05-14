@@ -64,23 +64,27 @@ and solve_not = (
     }
 };
 
-let rec vars_in_query: query => list(string) = fun
+module StrSet = Set.Make({
+    type t = string;
+    let compare = compare;
+});
+
+let rec vars_in_query: query => StrSet.t = fun
 | Term(t) => vars_in_term(t)
 | And(ts) => vars_in_query_list(ts)
-| Not(_) => []
-and vars_in_query_list: list(query) => list(string) = fun
-| [] => []
-| [q, ...qs] => vars_in_query(q) @ vars_in_query_list(qs)
-and vars_in_term: U.term => list(string) = fun
-| U.Var(v) => [v]
+| Not(_) => StrSet.empty
+and vars_in_query_list: list(query) => StrSet.t = fun
+| [] => StrSet.empty
+| [q, ...qs] => StrSet.union(vars_in_query(q), vars_in_query_list(qs))
+and vars_in_term: U.term => StrSet.t = fun
+| U.Var(v) => StrSet.singleton(v)
 | U.Pred(_, args) => vars_in_term_list(args)
-and vars_in_term_list: list(U.term) => list(string) = fun
-| [] => []
-| [t, ...ts] => vars_in_term(t) @ vars_in_term_list(ts)
+and vars_in_term_list: list(U.term) => StrSet.t = fun
+| [] => StrSet.empty
+| [t, ...ts] => StrSet.union(vars_in_term(t), vars_in_term_list(ts))
 ;
 
-let mappings: (query, U.unifier_set) => VarMapping.t = (query, unifs) => {
-    let var_names = vars_in_query(query);
+let mappings: (StrSet.t, U.unifier_set) => VarMapping.t = (var_names, unifs) => {
     let key_value = name => {
         let varia = U.Var(name);
         let value = unifs |> U.concretize(varia);
@@ -91,8 +95,9 @@ let mappings: (query, U.unifier_set) => VarMapping.t = (query, unifs) => {
         }
     };
     var_names
-    |> List.sort_uniq(compare)
+    |> StrSet.elements
     |> Belt.List.keepMap(_, key_value)
+    |> Array.of_list
 };
 
 let rec terms_in: query => list(U.term) = fun
@@ -105,16 +110,16 @@ let rec terms_in: query => list(U.term) = fun
 exception Invalid_query(string);
 
 let validate = query => {
-    let rec iter = (q: query, seen_vars: list(string)) => {
+    let rec iter = (q: query, seen_vars: StrSet.t) => {
         switch (q) {
         | Term(_) | And([]) => ()
         | And([q, ...qs]) =>
             // First, recurse into `q` with `seen_vars`.
             iter(q, seen_vars);
             // Then check `qs`, but use the vars defined in `q` as well.
-            iter(And(qs), vars_in_query(q) @ seen_vars)
+            iter(And(qs), StrSet.union(vars_in_query(q), seen_vars))
         | Not(q) =>
-            if (Utils.(seen_vars <: vars_in_query(q))) {
+            if (!StrSet.subset(vars_in_query(q), seen_vars)) {
                 let msg = "Variables must be bound BEFORE appearing in a `not` predicate!";
                 raise(Invalid_query(msg))
             } else {
@@ -122,7 +127,7 @@ let validate = query => {
             }
         }
     };
-    iter(query, []);
+    iter(query, StrSet.empty)
 };
 
 let register_query = (query: query, unifs: U.unifier_set): U.unifier_set => {
@@ -132,5 +137,6 @@ let register_query = (query: query, unifs: U.unifier_set): U.unifier_set => {
 let solve_query = (query: query, kb: knowledge_base): Seq.t(VarMapping.t) => {
     validate(query);
     let unifs = kb |> U.from_list |> register_query(query);
-    solve(query, unifs, kb) |> Seq.map(mappings(query))
+    let query_vars = vars_in_query(query);
+    solve(query, unifs, kb) |> Seq.map(mappings(query_vars))
 };

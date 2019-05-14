@@ -36,7 +36,8 @@ let solve = (
     kb: Q.knowledge_base,
 ): Seq.t(array((string, U.term))) => {
     Q.validate(query);
-    let into_pairs = soln => soln |> Q.mappings(query) |> Array.of_list;
+    let query_vars = Q.vars_in_query(query);
+    let into_pairs = Q.mappings(query_vars);
     Q.solve(query, unifs, kb) |> Seq.map(into_pairs)
 };
 // </QUERY> //////////////////////////////////////////////////////////

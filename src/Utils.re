@@ -21,10 +21,3 @@ let flat_map = (
     };
     iter(lst, [])
 };
-
-let strict_superset = (small: list('a), big: list('a)): bool => {
-    open List;
-    !exists(b => mem(b, small), big)
-};
-
-let (<:) = strict_superset;

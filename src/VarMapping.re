@@ -1,10 +1,11 @@
 module U = UnifierSet;
 
-type t = list((string, U.term));
+type t = array((string, U.term));
 
 let to_string: t => string = vm => {
     vm
-    |> List.map(((str, term)) => str ++ " => " ++ U.string_of_term(term))
+    |> Array.map(((str, term)) => str ++ " => " ++ U.string_of_term(term))
+    |> Array.to_list
     |> String.concat(", ")
     |> str => {j|[$str]|j}
 };
