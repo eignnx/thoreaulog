@@ -37,11 +37,12 @@ let solve = (
 ): array(array((string, U.term))) => {
     Q.validate(query);
     Q.solve(query, unifs, kb)
-    |> List.map(soln => {
+    |> Seq.map(soln => {
         soln
         |> Q.mappings(query)
         |> Array.of_list
     })
+    |> Seq.to_list
     |> Array.of_list
 };
 // </QUERY> //////////////////////////////////////////////////////////

@@ -1,11 +1,11 @@
 module U = UnifierSet;
 
-type t = list(U.unifier_set);
+type t = Seq.t(U.unifier_set);
 
 let to_string = (solution: t): string => {
-    switch (solution) {
+    switch (solution |> Seq.to_list) {
     | [] => "[]"
-    | _ => solution
+    | solution => solution
         |> List.map(unifs => U.string_of_unifier_set(unifs))
         |> String.concat(",\n")
         |> str => {j|[$str]|j}

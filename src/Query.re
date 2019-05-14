@@ -35,9 +35,9 @@ and solve_term = (
     unifs: U.unifier_set,
     kb: knowledge_base,
 ) => {
-    // For each fact in the knowledge base, try unifying the fact with the
-    // term. Only keep the unification results that are non-`None`.
-    Belt.List.keepMap(kb, U.unify(_, term, unifs))
+    // For each fact in the knowledge base, try unifying the `term` with the
+    // fact. Only keep the unification results that are non-`None`.
+    kb |> Seq.of_list |> Seq.filter_map(fact => unifs |> U.unify(fact, term))
 }
 and solve_and = (
     query: list(query),
@@ -45,11 +45,11 @@ and solve_and = (
     kb: knowledge_base,
 ): Solution.t => {
     switch (query) {
-    | [] => [unifs]
+    | [] => Seq.return(unifs)
     | [subgoal, ...subgoals] =>
         // This first `solve` gives a list of possibilities. We must then try
         // solving `subgoals` using each of the possible `unifier_set`s.
-        solve(subgoal, unifs, kb) |> Utils.flat_map(unifs => solve_and(subgoals, unifs, kb))
+        solve(subgoal, unifs, kb) |> Seq.flat_map(unifs => solve_and(subgoals, unifs, kb))
     };
 }
 and solve_not = (
@@ -57,9 +57,10 @@ and solve_not = (
     unifs: U.unifier_set,
     kb: knowledge_base,
 ): Solution.t => {
-    switch (solve(query, unifs, kb)) {
-    | [] => [unifs] // Is this correct?
-    | _ => [] // OPTIMIZE: We only need one counter-example, so if ONE is found we can stop.
+    let solns = solve(query, unifs, kb);
+    switch (solns()) {
+    | Seq.Nil => Seq.return(unifs)
+    | _ => Seq.empty
     }
 };
 
@@ -128,8 +129,8 @@ let register_query = (query: query, unifs: U.unifier_set): U.unifier_set => {
     unifs |> U.register_all(terms_in(query))
 };
 
-let solve_query = (query: query, kb: knowledge_base): list(VarMapping.t) => {
+let solve_query = (query: query, kb: knowledge_base): Seq.t(VarMapping.t) => {
     validate(query);
     let unifs = kb |> U.from_list |> register_query(query);
-    solve(query, unifs, kb) |> List.map(mappings(query))
+    solve(query, unifs, kb) |> Seq.map(mappings(query))
 };

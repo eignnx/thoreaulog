@@ -16,7 +16,7 @@ let kb: knowledge_base = [
 describe("Expect", () => {
     test("no substitutions for an empty query", () => {
         let query: query = And([]);
-        expect(kb |> solve_query(query)) |> toEqual([[]])
+        expect(kb |> solve_query(query) |> Seq.to_list) |> toEqual([[]])
     });
 
     test("one answer for simple query", () => {
@@ -32,7 +32,7 @@ describe("Expect", () => {
             [("X", atom("matt"))]
         ];
 
-        expect(kb |> solve_query(query)) |> toEqual(expected)
+        expect(kb |> solve_query(query) |> Seq.to_list) |> toEqual(expected)
     });
 
     test("two-part, disconnected query to work", () => {
@@ -48,7 +48,7 @@ describe("Expect", () => {
             ]
         ];
 
-        expect(kb |> solve_query(query)) |> toEqual(ans)
+        expect(kb |> solve_query(query) |> Seq.to_list) |> toEqual(ans)
     });
 
     test("two-part, connected query to work", () => {
@@ -64,7 +64,7 @@ describe("Expect", () => {
             ]
         ];
 
-        expect(kb |> solve_query(query)) |> toEqual(ans)
+        expect(kb |> solve_query(query) |> Seq.to_list) |> toEqual(ans)
     });
 });
 
@@ -83,7 +83,7 @@ describe("Expect to find multiple solutions", () => {
             ]
         ];
 
-        expect(kb |> solve_query(query)) |> toEqual(ans)
+        expect(kb |> solve_query(query) |> Seq.to_list) |> toEqual(ans)
     });
 });
 
@@ -105,7 +105,7 @@ describe("Expect a long string of subqueries", () => {
             ]
         ];
 
-        expect(kb |> solve_query(query)) |> toEqual(ans)
+        expect(kb |> solve_query(query) |> Seq.to_list) |> toEqual(ans)
     });
 
     test("with extraneous fact to work", () => {
@@ -121,7 +121,7 @@ describe("Expect a long string of subqueries", () => {
             ]
         ];
 
-        expect(kb |> solve_query(query)) |> toEqual(ans)
+        expect(kb |> solve_query(query) |> Seq.to_list) |> toEqual(ans)
     });
 });
 
@@ -162,7 +162,7 @@ describe("Expect queries on family tree knowledgebase", () => {
             ]
         };
 
-        expect(kb |> solve_query(query)) |> toEqual(ans)
+        expect(kb |> solve_query(query) |> Seq.to_list) |> toEqual(ans)
     });
 
     test("can find all grandparents of kylo", () => {
@@ -182,7 +182,7 @@ describe("Expect queries on family tree knowledgebase", () => {
             ])
         ];
 
-        expect(kb |> solve_query(query)) |> toEqual(ans)
+        expect(kb |> solve_query(query) |> Seq.to_list) |> toEqual(ans)
     });
 
     test("can find every parent of kylo who is not the child of anakin", () => {
@@ -197,7 +197,7 @@ describe("Expect queries on family tree knowledgebase", () => {
             ]
         ];
 
-        expect(kb |> solve_query(query)) |> toEqual(ans)
+        expect(kb |> solve_query(query) |> Seq.to_list) |> toEqual(ans)
     });
 
     test("will throw an error when a `not` defines a variable", () => {
