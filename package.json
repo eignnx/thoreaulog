@@ -1,6 +1,7 @@
 {
   "name": "thoreaulog",
   "version": "0.1.0",
+  "main": "src/exports.js",
   "scripts": {
     "build": "bsb -make-world",
     "start": "bsb -make-world -w",
@@ -10,7 +11,7 @@
   "keywords": [
     "BuckleScript"
   ],
-  "author": "",
+  "author": "Gideon Buckwalter eignnx@gmail.com (https://eignnx.github.io)",
   "license": "MIT",
   "devDependencies": {
     "@glennsl/bs-jest": "^0.4.8",
