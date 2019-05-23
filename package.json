@@ -1,12 +1,14 @@
 {
   "name": "thoreaulog",
-  "version": "0.1.0",
+  "version": "0.1.10",
   "main": "src/exports.js",
   "scripts": {
     "build": "bsb -make-world",
     "start": "bsb -make-world -w",
     "clean": "bsb -clean-world",
-    "test": "npm run build && jest"
+    "test": "npm run build && jest",
+    "preinstall": "npm i bs-platform@^5.0.4 && npm i @glennsl/bs-jest@^0.4.8",
+    "postinstall": "npm run build"
   },
   "keywords": [
     "BuckleScript"

@@ -4,6 +4,12 @@ A simple Prolog implementation written in ReasonML. Use it in your web applicati
 ## Example
 
 ```javascript
+const {
+    KnowledgeBase,
+    Query,
+    Term,
+} = require("thoreaulog");
+
 const kb = new KnowledgeBase();
 kb.addFact("likes", ["darcy", "carrie"]);
 kb.addFact("likes", ["carrie", "darcy"]);
